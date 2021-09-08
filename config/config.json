@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "root",
-    "password": null,
-    "database": null,
+    "password": "Password",
+    "database": "tothemoon",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

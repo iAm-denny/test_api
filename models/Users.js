@@ -33,6 +33,12 @@ module.exports = (sequelize, Datatypes) => {
 
     Users.hasMany(models.Follows, {
       onDelete: "cascade",
+      foreignKey: "user_id",
+    });
+
+    Users.hasMany(models.Follows, {
+      onDelete: "cascade",
+      foreignKey: "followByUser_id",
     });
   };
 

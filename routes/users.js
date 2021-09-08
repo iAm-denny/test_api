@@ -5,6 +5,31 @@ const jwt = require("jsonwebtoken");
 
 const secretCode = "<?.deaf7&^$&?75(_==)4";
 
+/**
+ * @swagger
+ * /register:
+ *  post:
+ *    description: "Create account"
+ *    requestBody:
+ *      required: true
+ *      content:
+ *         application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *             username:
+ *              type: string
+ *             email:
+ *              type: string
+ *             password:
+ *              type: string
+ *      responses:
+ *      '200':
+ *           description: 'Created successfully'
+ *           content:
+ *                application/json:
+ */
+
 route.post("/register", async (req, res) => {
   const { email, username, password } = req.body;
 
@@ -34,6 +59,30 @@ route.post("/register", async (req, res) => {
     return res.json({ error: err });
   }
 });
+
+/**
+ * @swagger
+ * /login:
+ *  post:
+ *    description: "Log in"
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *         schema:
+ *          type: object
+ *          properties:
+ *            email:
+ *              type: string
+ *            password:
+ *              type: string
+ *    responses:
+ *    '200':
+ *        description: "Logged in successfully"
+ *        content:
+ *            application/json:
+ *
+ */
 
 route.post("/login", async (req, res) => {
   const { email, password } = req.body;
