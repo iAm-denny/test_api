@@ -1,8 +1,8 @@
 const route = require("express").Router();
 const bcrypt = require("bcrypt");
-const { Users } = require("../models");
+const { Users, Notifications, Posts, sequelize } = require("../models");
 const jwt = require("jsonwebtoken");
-
+const { validateToken } = require("../middlewares/validation");
 const secretCode = "<?.deaf7&^$&?75(_==)4";
 
 /**
@@ -112,6 +112,52 @@ route.post("/login", async (req, res) => {
         return res.json({ accessToken });
       });
     }
+  } catch (err) {
+    return res.json({ error: err });
+  }
+});
+
+route.get("/notifications", validateToken, async (req, res) => {
+  try {
+
+    const io = req.app.get('socketio')
+
+    const raw_query = `
+    SELECT 
+    notifications.type, notifications.post_id, users.username, notifications.read
+    FROM notifications
+    JOIN users ON 
+    notifications.by_userId = users.id
+    WHERE notifications.to_userId = ${req.user.id}`;
+
+    const notis = await sequelize.query(raw_query, {
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    io.emit('get_notifications', notis)
+
+    return res.json({ message: "success", notifications: notis });
+  } catch (err) {
+    return res.json({ error: err });
+  }
+});
+
+
+
+
+route.post("/read_notifications", validateToken, async (req, res) => {
+  try {
+    const updatedNotifcations = await Notifications.update(
+      {
+        read: true,
+      },
+      {
+        where: {
+          to_userId: req.user.id,
+        },
+      }
+    );
+    return res.json({ message: "success", notifications: updatedNotifcations });
   } catch (err) {
     return res.json({ error: err });
   }

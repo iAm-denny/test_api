@@ -22,6 +22,11 @@ module.exports = (sequelize, DataTypes) => {
     Posts.hasMany(models.SavedPost, {
       onDelete: "cascade",
     });
+
+    Posts.hasMany(models.Notifications, {
+      onDelete: "cascade",
+      foreignKey: "post_id",
+    });
   };
   return Posts;
 };

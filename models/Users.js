@@ -40,6 +40,16 @@ module.exports = (sequelize, Datatypes) => {
       onDelete: "cascade",
       foreignKey: "followByUser_id",
     });
+
+    Users.hasMany(models.Notifications, {
+      onDelete: "cascade",
+      foreignKey: "by_userId",
+    });
+
+    Users.hasMany(models.Notifications, {
+      onDelete: "cascade",
+      foreignKey: "to_userId",
+    });
   };
 
   return Users;

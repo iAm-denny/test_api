@@ -1,5 +1,12 @@
 const route = require("express").Router();
-const { Posts, Likes, Comments, SavedPost, Users } = require("../models");
+const {
+  Posts,
+  Likes,
+  Comments,
+  SavedPost,
+  Users,
+  Notifications,
+} = require("../models");
 const { validateToken } = require("../middlewares/validation");
 
 /**
@@ -79,7 +86,7 @@ route.post("/", validateToken, async (req, res) => {
  */
 
 route.post("/like", validateToken, async (req, res) => {
-  const { post_id } = req.body;
+  const { post_id, post_userId } = req.body;
   try {
     const likeFound = await Likes.findOne({
       where: {
@@ -93,6 +100,15 @@ route.post("/like", validateToken, async (req, res) => {
         UserId: req.user.id,
         PostId: post_id,
       });
+
+      await Notifications.create({
+        type: "like",
+        by_userId: req.user.id,
+        post_id: post_id,
+        to_userId: post_userId,
+        read: false,
+      });
+
       return res.json({
         message: "success liked",
       });
@@ -101,6 +117,16 @@ route.post("/like", validateToken, async (req, res) => {
         where: {
           UserId: req.user.id,
           PostId: post_id,
+        },
+      });
+
+      await Notifications.destroy({
+        where: {
+          type: "like",
+          by_userId: req.user.id,
+          post_id: post_id,
+          to_userId: post_userId,
+          read: false,
         },
       });
       return res.json({
@@ -113,7 +139,7 @@ route.post("/like", validateToken, async (req, res) => {
 });
 
 route.post("/comment", validateToken, async (req, res) => {
-  const { post_id, body } = req.body;
+  const { post_id, body, post_user_id } = req.body;
 
   try {
     await Comments.create({
@@ -121,6 +147,15 @@ route.post("/comment", validateToken, async (req, res) => {
       PostId: post_id,
       UserId: req.user.id,
     });
+
+    await Notifications.create({
+      type: "comment",
+      post_id: post_id,
+      to_userId: post_user_id,
+      by_userId: req.user.id,
+      read: false,
+    });
+
     return res.json({ message: "success" });
   } catch (err) {
     return res.json({ error: err });
