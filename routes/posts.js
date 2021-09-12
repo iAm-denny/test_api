@@ -9,6 +9,22 @@ const {
 } = require("../models");
 const { validateToken } = require("../middlewares/validation");
 
+const redis = require("redis");
+const redisClient = redis.createClient();
+const DEFAULT_EXPIRATION = 3600; // 1 hour
+
+const redisCacheFun = (key, cb) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(key, async (error, data) => {
+      if (error) return reject(error);
+      if (data != null) return resolve(JSON.parse(data)); // If data is existing in redis, return that one
+      const freshData = await cb(); // else fetch data and then saved into redis
+      redisClient.setex(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
+      resolve(freshData);
+    });
+  });
+};
+
 /**
  * @swagger
  * /post/:
@@ -22,12 +38,18 @@ const { validateToken } = require("../middlewares/validation");
  */
 
 route.get("/", async (req, res) => {
-  const posts = await Posts.findAll({
-    order: [["createdAt", "DESC"]],
-    include: [Likes, Comments],
-  });
-
-  return res.json({ message: "success", data: posts });
+  try {
+    const posts = await redisCacheFun("posts", async () => {
+      const posts = await Posts.findAll({
+        order: [["createdAt", "DESC"]],
+        include: [Likes, Comments],
+      });
+      return posts;
+    });
+    return res.json({ message: "success", data: posts });
+  } catch (err) {
+    return res.json({ error: err });
+  }
 });
 
 /**

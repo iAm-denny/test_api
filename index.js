@@ -6,9 +6,12 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const { Server } = require('socket.io')
 const http = require('http')
 const { Notifications } = require('./models')
+const redis = require("redis");
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+const REDIS_PORT = process.env.REDIS_PORT || 6379;
+const redisClient = redis.createClient(REDIS_PORT);
 
 // route
 const userRouter = require("./routes/users");
@@ -61,10 +64,14 @@ io.on('connection', async (socket) => {
   console.log('-----------------')
   io.emit('get_notifications', notis)
 })
-
+redisClient.on('connect', () => {
+  console.log(`Connected to Redis on port ${REDIS_PORT}.`)
+  console.log(`-------------------------.`)
+});
 db.sequelize
   .sync()
   .then(() => {
+
     server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
   })

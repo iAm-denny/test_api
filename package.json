@@ -11,12 +11,15 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "bluebird": "^3.7.2",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.0",
+    "redis": "^3.1.2",
     "sequelize": "^6.6.5",
     "sequelize-cli": "^6.2.0",
+    "sequelize-redis": "^1.0.12",
     "socket.io": "^4.2.0",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6"
